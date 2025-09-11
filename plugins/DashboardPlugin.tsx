@@ -1,0 +1,35 @@
+import React from 'react';
+import { ADMIN_STATS } from '../constants';
+import type { AdminStat } from '../types';
+
+const StatCard: React.FC<{ stat: AdminStat }> = ({ stat }) => (
+    <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
+        <div className="flex justify-between items-start">
+            <div>
+                <p className="text-sm font-medium text-gray-400">{stat.title}</p>
+                <p className="text-3xl font-bold text-white mt-1">{stat.value}</p>
+                <p className="text-sm text-green-400 mt-1">{stat.change} so với tháng trước</p>
+            </div>
+            <div className="bg-yellow-400/10 text-yellow-400 rounded-lg p-3">
+                <stat.icon className="h-6 w-6" />
+            </div>
+        </div>
+    </div>
+);
+
+
+const DashboardPlugin: React.FC = () => {
+    return (
+        <div>
+            <h1 className="text-2xl font-bold text-white mb-6">Tổng quan</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {ADMIN_STATS.map((stat, index) => (
+                    <StatCard key={index} stat={stat} />
+                ))}
+            </div>
+            {/* You can add more dashboard widgets here in the future */}
+        </div>
+    );
+};
+
+export default DashboardPlugin;
