@@ -5,7 +5,7 @@ import FilmIcon from '../icons/FilmIcon';
 
 interface MediaManagerProps {
     items: MediaItem[];
-    onUpload: (item: Omit<MediaItem, 'id'>) => void;
+    onAddMedia: (item: Omit<MediaItem, 'id'>) => void;
 }
 
 const MediaGridItem: React.FC<{ item: MediaItem }> = ({ item }) => {
@@ -15,10 +15,13 @@ const MediaGridItem: React.FC<{ item: MediaItem }> = ({ item }) => {
                 <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
             ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                    <FilmIcon className="w-16 h-16 text-gray-500" />
+                    <video src={item.url} className="w-full h-full object-cover" />
                 </div>
             )}
-            <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                 {item.type === 'video' && <FilmIcon className="w-12 h-12 text-white" />}
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2 text-white">
                 <p className="text-xs font-bold truncate">{item.name}</p>
                 <p className="text-xs text-gray-400">{item.size}</p>
             </div>
@@ -27,18 +30,24 @@ const MediaGridItem: React.FC<{ item: MediaItem }> = ({ item }) => {
 };
 
 
-const MediaManager: React.FC<MediaManagerProps> = ({ items, onUpload }) => {
+const MediaManager: React.FC<MediaManagerProps> = ({ items, onAddMedia }) => {
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const newItem: Omit<MediaItem, 'id'> = {
-                name: file.name,
-                size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-                type: file.type.startsWith('image/') ? 'image' : 'video',
-                url: URL.createObjectURL(file), // Create a temporary local URL for preview
+             const reader = new FileReader();
+             reader.onload = (event) => {
+                if (event.target?.result) {
+                    const newItem: Omit<MediaItem, 'id'> = {
+                        name: file.name,
+                        size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+                        type: file.type.startsWith('image/') ? 'image' : 'video',
+                        url: event.target.result as string, // Base64 data URL
+                    };
+                    onAddMedia(newItem);
+                }
             };
-            onUpload(newItem);
+            reader.readAsDataURL(file);
         }
     };
 

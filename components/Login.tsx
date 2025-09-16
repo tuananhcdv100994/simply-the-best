@@ -1,9 +1,10 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import Logo from './icons/Logo';
+import type { User } from '../types';
 
 interface LoginProps {
-    onNavigate: (view: 'register' | 'home' | 'admin') => void;
+    onNavigate: (view: 'register' | 'home' | 'admin', data?: any) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onNavigate }) => {
@@ -22,10 +23,10 @@ const Login: React.FC<LoginProps> = ({ onNavigate }) => {
             return;
         }
 
-        const success = await auth.login(email, password);
+        const user = await auth.login(email, password);
         
-        if (success && auth.currentUser) {
-            if (auth.currentUser.role === 'Admin') {
+        if (user) {
+            if (user.role === 'Admin') {
                  onNavigate('admin');
             } else {
                  onNavigate('home');

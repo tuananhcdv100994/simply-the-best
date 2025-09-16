@@ -4,6 +4,14 @@ export interface CoreValue {
   icon: React.ComponentType<{ className?: string }>;
 }
 
+export interface Comment {
+  id: number;
+  author: string;
+  avatarUrl: string;
+  text: string;
+  date: string;
+}
+
 export interface Post {
   id: number;
   author: string;
@@ -12,7 +20,7 @@ export interface Post {
   content: string;
   imageUrl: string;
   likes: number;
-  comments: number;
+  comments: Comment[];
   status: 'Xuất bản' | 'Bản nháp';
   seoKeywords: string;
   datePublished: string;
@@ -82,7 +90,7 @@ export interface User {
   avatarUrl: string;
   role: 'Admin' | 'User';
   joined: string;
-  status: 'Hoạt động' | 'Bị cấm';
+  status: 'Hoạt động' | 'Bị cấm' | 'Chờ duyệt';
   points: number;
   level: UserLevel;
   onlineStatus: 'Online' | 'Offline';
@@ -108,9 +116,10 @@ export interface SiteContent {
 export interface AuthContextType {
     currentUser: User | null;
     users: User[];
-    login: (email: string, password: string) => Promise<boolean>;
+    login: (email: string, password: string) => Promise<User | null>;
     register: (name: string, email: string, password: string) => Promise<boolean>;
     logout: () => void;
+    updateUser: (user: User) => void;
     loading: boolean;
 }
 
@@ -162,12 +171,17 @@ export interface MediaItem {
     size: string;
 }
 
-export type AdminView = 'dashboard' | 'posts' | 'media' | 'users' | 'products' | 'appearance' | 'plugins' | 'analytics';
+export type AdminView = 'dashboard' | 'posts' | 'postEditor' | 'media' | 'users' | 'products' | 'productEditor' | 'appearance' | 'plugins' | 'analytics';
 
+export interface AdminSubMenuItem {
+    id: AdminView;
+    label: string;
+}
 export interface PluginDefinition {
     id: AdminView;
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     component: React.FC<any>; 
     notificationCount?: number;
+    subItems?: AdminSubMenuItem[];
 }

@@ -1,12 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Logo from './icons/Logo';
+import { AuthContext } from '../contexts/AuthContext';
+import { USER_LEVELS } from '../constants';
+import type { User } from '../types';
+import EditIcon from './icons/EditIcon';
 
 interface HeaderProps {
-    onNavigate: (view: 'home' | 'login' | 'register') => void;
+    onNavigate: (view: 'home' | 'login' | 'register' | 'admin' | 'profile', data?: any) => void;
+    onToggleEditing: () => void;
+    isEditing: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
+const UserMenu: React.FC<{user: User, onLogout: () => void, onNavigate: HeaderProps['onNavigate'], onToggleEditing: () => void, isEditing: boolean}> = ({ user, onLogout, onNavigate, onToggleEditing, isEditing }) => {
+    const levelInfo = USER_LEVELS.find(l => l.name === user.level) || USER_LEVELS[0];
+     return (
+        <div className="flex items-center space-x-4">
+             <div className="text-right hidden sm:block">
+                 <div className="font-bold text-white">{user.name}</div>
+                 <div className="text-xs text-yellow-400">{levelInfo.badge} {user.points.toLocaleString()} điểm</div>
+            </div>
+            <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full object-cover border-2 border-yellow-400"/>
+            {user.role === 'Admin' && (
+                <>
+                    <button onClick={() => onNavigate('admin')} className="hidden lg:block text-sm font-semibold text-gray-300 hover:text-yellow-400 transition-colors duration-300">
+                        Bảng điều khiển
+                    </button>
+                    <button onClick={onToggleEditing} className={`hidden lg:flex items-center space-x-2 text-sm font-semibold py-2 px-3 rounded-full transition-colors duration-300 ${isEditing ? 'bg-yellow-400 text-gray-900' : 'text-gray-300 hover:text-yellow-400'}`}>
+                        <EditIcon className="w-4 h-4" />
+                        <span>Sửa trang</span>
+                    </button>
+                 </>
+            )}
+            <button onClick={onLogout} className="bg-yellow-400 text-gray-900 hover:bg-yellow-300 transition-all duration-300 font-bold py-2 px-4 rounded-full text-sm">
+                Đăng xuất
+            </button>
+        </div>
+    );
+}
+
+
+const GuestMenu: React.FC<{onNavigate: HeaderProps['onNavigate']}> = ({ onNavigate }) => {
+    return (
+         <div className="hidden lg:flex items-center space-x-2">
+            <button onClick={() => onNavigate('login')} className="text-sm font-semibold text-gray-300 hover:text-yellow-400 transition-colors duration-300 py-2 px-4">
+                Đăng nhập
+            </button>
+            <button onClick={() => onNavigate('register')} className="bg-yellow-400 text-gray-900 hover:bg-yellow-300 transition-all duration-300 font-bold py-2 px-5 rounded-full text-sm">
+                Đăng ký
+            </button>
+          </div>
+    );
+}
+
+const Header: React.FC<HeaderProps> = ({ onNavigate, onToggleEditing, isEditing }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const auth = useContext(AuthContext);
   
   const navLinks = [
     { href: '#about', label: 'Giá trị' },
@@ -15,6 +63,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     { href: '#events', label: 'Sự kiện' },
     { href: '#merch', label: 'Cửa hàng' },
   ];
+
+  const handleLogout = () => {
+    auth?.logout();
+    onNavigate('home');
+  }
 
   return (
     <header className={'sticky top-0 left-0 right-0 z-50 bg-gray-900/80 backdrop-blur-lg shadow-lg'}>
@@ -32,14 +85,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
             ))}
           </nav>
         
-          <div className="hidden lg:flex items-center space-x-2">
-            <button onClick={() => onNavigate('login')} className="text-sm font-semibold text-gray-300 hover:text-yellow-400 transition-colors duration-300 py-2 px-4">
-                Đăng nhập
-            </button>
-            <button onClick={() => onNavigate('register')} className="bg-yellow-400 text-gray-900 hover:bg-yellow-300 transition-all duration-300 font-bold py-2 px-5 rounded-full text-sm">
-                Đăng ký
-            </button>
-          </div>
+          {auth?.currentUser ? <UserMenu user={auth.currentUser} onLogout={handleLogout} onNavigate={onNavigate} onToggleEditing={onToggleEditing} isEditing={isEditing} /> : <GuestMenu onNavigate={onNavigate} />}
           
           <button className="lg:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor">
@@ -49,7 +95,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
         </div>
       </div>
        {/* Mobile Menu */}
-      <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-96' : 'max-h-0'}`}>
+      <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-screen' : 'max-h-0'}`}>
         <div className="px-4 pt-2 pb-4 border-t border-gray-700">
             <nav className="flex flex-col space-y-3">
                  {navLinks.map((link) => (
@@ -59,12 +105,30 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
                 ))}
             </nav>
             <div className="mt-4 pt-4 border-t border-gray-700 flex flex-col space-y-3">
-                <button onClick={() => { onNavigate('login'); setIsMenuOpen(false); }} className="w-full text-left text-base font-semibold text-gray-300 hover:text-yellow-400 transition-colors duration-300 py-2">
-                    Đăng nhập
-                </button>
-                <button onClick={() => { onNavigate('register'); setIsMenuOpen(false); }} className="w-full bg-yellow-400 text-gray-900 hover:bg-yellow-300 transition-all duration-300 font-bold py-2 px-5 rounded-full text-base">
-                    Đăng ký
-                </button>
+                {!auth?.currentUser ? (
+                    <>
+                        <button onClick={() => { onNavigate('login'); setIsMenuOpen(false); }} className="w-full text-left text-base font-semibold text-gray-300 hover:text-yellow-400 transition-colors duration-300 py-2">
+                            Đăng nhập
+                        </button>
+                        <button onClick={() => { onNavigate('register'); setIsMenuOpen(false); }} className="w-full bg-yellow-400 text-gray-900 hover:bg-yellow-300 transition-all duration-300 font-bold py-2 px-5 rounded-full text-base">
+                            Đăng ký
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        {auth.currentUser.role === 'Admin' && (
+                             <button onClick={() => { onNavigate('admin'); setIsMenuOpen(false); }} className="w-full text-left text-base font-semibold text-gray-300 hover:text-yellow-400 transition-colors duration-300 py-2">
+                                Bảng điều khiển
+                             </button>
+                        )}
+                        <button onClick={() => { onNavigate('profile'); setIsMenuOpen(false); }} className="w-full text-left text-base font-semibold text-gray-300 hover:text-yellow-400 transition-colors duration-300 py-2">
+                           Hồ sơ
+                        </button>
+                        <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="w-full bg-red-500 text-white hover:bg-red-400 transition-all duration-300 font-bold py-2 px-5 rounded-full text-base">
+                            Đăng xuất
+                        </button>
+                    </>
+                )}
             </div>
         </div>
       </div>

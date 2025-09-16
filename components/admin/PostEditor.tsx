@@ -17,7 +17,8 @@ const NEW_POST_TEMPLATE: Post = {
     author: '',
     category: 'Sự nghiệp',
     likes: 0,
-    comments: 0,
+    // FIX: Changed comments from number to an empty array to match the Post type.
+    comments: [],
     status: 'Bản nháp',
     seoKeywords: '',
     datePublished: new Date().toISOString().split('T')[0],

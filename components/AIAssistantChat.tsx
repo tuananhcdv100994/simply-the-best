@@ -11,7 +11,7 @@ interface AIAssistantChatProps {
 
 const AIAssistantChat: React.FC<AIAssistantChatProps> = ({ isOpen, onClose, onStartGuide }) => {
     const [messages, setMessages] = useState<ChatMessage[]>([
-        { id: 1, text: 'Xin chào! Chào mừng bạn đến với Simply The Best! Tôi có thể hướng dẫn bạn cách tạo bài viết đầu tiên. Bạn có muốn bắt đầu không?', sender: 'ai' }
+        { id: 1, text: 'Xin chào! Chào mừng bạn đến với Simply The Best! Tôi có thể giúp gì cho bạn hôm nay?', sender: 'ai' }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -23,27 +23,26 @@ const AIAssistantChat: React.FC<AIAssistantChatProps> = ({ isOpen, onClose, onSt
     };
 
     useEffect(scrollToBottom, [messages]);
+    
+    const processMessage = async (messageText: string) => {
+        if (!messageText.trim() || isLoading) return;
 
-    const handleSendMessage = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!input.trim() || isLoading) return;
-
-        const userMessage: ChatMessage = { id: Date.now(), text: input, sender: 'user' };
+        const userMessage: ChatMessage = { id: Date.now(), text: messageText, sender: 'user' };
         setMessages(prev => [...prev, userMessage, { id: Date.now() + 1, text: '', sender: 'ai', isTyping: true }]);
         setInput('');
         setIsLoading(true);
 
         try {
-            const aiResponseText = await getChatbotResponse(messages, input, auth?.currentUser?.role, auth?.currentUser?.name);
+            const aiResponseText = await getChatbotResponse(messages, messageText, auth?.currentUser?.role, auth?.currentUser?.name);
             
-            // Check for guide command
             const guideMatch = aiResponseText.match(/\[GUIDE:(.*?)\]/);
             let cleanText = aiResponseText;
 
             if (guideMatch && guideMatch[1]) {
                 const guideName = guideMatch[1].trim();
                 cleanText = aiResponseText.replace(/\[GUIDE:.*?\]/, '').trim();
-                onStartGuide(guideName);
+                // Add a small delay to ensure the UI can react before the guide starts
+                setTimeout(() => onStartGuide(guideName), 300);
             }
             
             const aiMessage: ChatMessage = { id: Date.now() + 2, text: cleanText, sender: 'ai' };
@@ -55,9 +54,25 @@ const AIAssistantChat: React.FC<AIAssistantChatProps> = ({ isOpen, onClose, onSt
         } finally {
             setIsLoading(false);
         }
+    }
+
+
+    const handleSendMessage = async (e: React.FormEvent) => {
+        e.preventDefault();
+        processMessage(input);
     };
     
+    const handleSuggestionClick = (suggestion: string) => {
+        processMessage(suggestion);
+    }
+    
     if (!isOpen) return null;
+    
+    const suggestions = [
+        "Cách đăng bài?",
+        "Cách tính điểm?",
+        "Gợi ý cho tôi một câu chuyện",
+    ];
 
     return (
         <div className="fixed bottom-24 right-6 w-full max-w-sm h-full max-h-[600px] bg-gray-800 rounded-xl shadow-2xl flex flex-col z-50 border border-gray-700">
@@ -80,7 +95,7 @@ const AIAssistantChat: React.FC<AIAssistantChatProps> = ({ isOpen, onClose, onSt
                                     <span className="w-2 h-2 bg-gray-500 rounded-full animate-pulse delay-300"></span>
                                 </div>
                            ) : (
-                               <p className="text-sm">{msg.text}</p>
+                               <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
                            )}
                         </div>
                     </div>
@@ -90,6 +105,13 @@ const AIAssistantChat: React.FC<AIAssistantChatProps> = ({ isOpen, onClose, onSt
 
             {/* Input */}
             <div className="flex-shrink-0 p-4 border-t border-gray-700">
+                 <div className="flex flex-wrap gap-2 mb-2">
+                    {suggestions.map(s => (
+                        <button key={s} onClick={() => handleSuggestionClick(s)} className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded-full hover:bg-gray-600">
+                            {s}
+                        </button>
+                    ))}
+                </div>
                 <form onSubmit={handleSendMessage} className="flex gap-2">
                     <input
                         type="text"

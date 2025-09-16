@@ -23,18 +23,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setLoading(false);
     }, []);
 
-    const login = async (email: string, password: string): Promise<boolean> => {
+    const login = async (email: string, password: string): Promise<User | null> => {
         const user = users.find(u => u.email === email && u.password === password);
-        if (user) {
+        
+        if (user && user.status === 'Bị cấm') {
+            alert('Tài khoản của bạn đã bị cấm.');
+            return null;
+        }
+        
+        if (user && user.status === 'Chờ duyệt') {
+            alert('Tài khoản của bạn đang chờ quản trị viên phê duyệt.');
+            return null;
+        }
+
+        if (user && user.status === 'Hoạt động') {
             const loggedInUser: User = { ...user, onlineStatus: 'Online' };
             setUsers(prevUsers =>
                 prevUsers.map(u => (u.id === user.id ? loggedInUser : u))
             );
             setCurrentUser(loggedInUser);
             sessionStorage.setItem('currentUser', JSON.stringify(loggedInUser));
-            return true;
+            return loggedInUser;
         }
-        return false;
+        return null;
     };
 
     const register = async (name: string, email: string, password: string): Promise<boolean> => {
@@ -51,16 +62,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             avatarUrl: `https://i.pravatar.cc/150?u=${email}`,
             role: 'User',
             joined: new Date().toISOString().split('T')[0],
-            status: 'Hoạt động',
+            status: 'Chờ duyệt', // New users must be approved
             points: 0,
             level: 'Thành viên mới',
-            onlineStatus: 'Online',
+            onlineStatus: 'Offline',
         };
         
         setUsers(prev => [...prev, newUser]);
-        setCurrentUser(newUser);
-        sessionStorage.setItem('currentUser', JSON.stringify(newUser));
+        alert('Đăng ký thành công! Tài khoản của bạn sẽ được kích hoạt sau khi quản trị viên phê duyệt.');
+        // Do not log in automatically
+        // setCurrentUser(newUser);
+        // sessionStorage.setItem('currentUser', JSON.stringify(newUser));
         return true;
+    };
+    
+    const updateUser = (updatedUser: User) => {
+        setUsers(prevUsers => prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u));
     };
 
     const logout = () => {
@@ -79,6 +96,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login,
         register,
         logout,
+        updateUser,
         loading,
     };
 

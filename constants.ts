@@ -7,6 +7,7 @@ import TrophyIcon from './components/icons/TrophyIcon';
 import GamepadIcon from './components/icons/GamepadIcon';
 import LightbulbIcon from './components/icons/LightbulbIcon';
 import StarIcon from './components/icons/StarIcon';
+import UserCheckIcon from './components/icons/UserCheckIcon';
 
 export const POSTS: Post[] = [
   { 
@@ -14,10 +15,13 @@ export const POSTS: Post[] = [
     author: 'An Nguyễn', 
     category: 'Thể thao', 
     title: 'Chinh phục Marathon lúc bình minh', 
-    content: 'Hành trình đầy thử thách và cảm xúc khi tôi hoàn thành cự ly 42km đầu tiên trong đời. Đó là một bài học về sự kiên trì, ý chí và giới hạn của bản thân...',
+    content: 'Hành trình đầy thử thách và cảm xúc khi tôi hoàn thành cự ly 42km đầu tiên trong đời. Đó là một bài học về sự kiên trì, ý chí và giới hạn của bản thân. Mỗi bước chạy không chỉ là một thử thách về thể chất mà còn là một cuộc đối thoại với chính mình. Ánh bình minh trên đường đua không chỉ chiếu sáng con đường mà còn soi rọi vào những góc khuất sâu thẳm nhất trong tâm hồn, nơi ý chí và quyết tâm được rèn giũa.',
     imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1600', 
     likes: 125, 
-    comments: 12,
+    comments: [
+        {id: 1, author: 'Bảo Trần', avatarUrl: 'https://images.unsplash.com/photo-1519714013440-34d281e5a51a?q=80&w=100', text: 'Tuyệt vời quá! Chúc mừng bạn nhé!', date: '2 ngày trước'},
+        {id: 2, author: 'Minh Hoàng', avatarUrl: 'https://images.unsplash.com/photo-1584483766114-2cea6facdf57?q=80&w=100', text: 'Truyền cảm hứng thực sự!', date: '1 ngày trước'},
+    ],
     status: 'Xuất bản',
     seoKeywords: 'marathon, chạy bộ, thể thao, ý chí',
     datePublished: '2024-09-15'
@@ -27,10 +31,10 @@ export const POSTS: Post[] = [
     author: 'Bảo Trần', 
     category: 'Nghệ thuật', 
     title: 'Triển lãm nghệ thuật cá nhân đầu tiên', 
-    content: 'Sau nhiều tháng chuẩn bị, cuối cùng tôi cũng đã ra mắt triển lãm "Sắc Màu Nội Tâm". Đây là một cột mốc quan trọng trên con đường nghệ thuật của tôi, nơi tôi chia sẻ những góc nhìn sâu thẳm nhất qua từng tác phẩm.',
+    content: 'Sau nhiều tháng chuẩn bị, cuối cùng tôi cũng đã ra mắt triển lãm "Sắc Màu Nội Tâm". Đây là một cột mốc quan trọng trên con đường nghệ thuật của tôi, nơi tôi chia sẻ những góc nhìn sâu thẳm nhất qua từng tác phẩm. Mỗi bức tranh là một câu chuyện, một mảnh ghép của tâm hồn tôi.',
     imageUrl: 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?q=80&w=1600', 
     likes: 230, 
-    comments: 34,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'nghệ thuật, triển lãm, hội họa, sáng tạo',
     datePublished: '2024-09-12'
@@ -43,7 +47,7 @@ export const POSTS: Post[] = [
     content: 'Cảm giác vỡ òa khi tên mình được xướng lên ở vị trí cao nhất. Huy chương vàng này là thành quả của những đêm không ngủ, những nỗ lực không ngừng nghỉ và sự ủng hộ của gia đình, thầy cô.',
     imageUrl: 'https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?q=80&w=1600', 
     likes: 540, 
-    comments: 68,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'olympic, vật lý, học thuật, huy chương vàng',
     datePublished: '2024-09-10'
@@ -56,7 +60,7 @@ export const POSTS: Post[] = [
     content: 'Từ một ý tưởng nhỏ, chúng tôi đã xây dựng nên một sản phẩm được thị trường đón nhận. Chặng đường khởi nghiệp đầy chông gai nhưng cũng thật xứng đáng. Đây chỉ là bước khởi đầu!',
     imageUrl: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1600', 
     likes: 410, 
-    comments: 55,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'startup, khởi nghiệp, công nghệ, thành công',
     datePublished: '2024-09-08'
@@ -69,7 +73,7 @@ export const POSTS: Post[] = [
     content: 'Một giải đấu không thể nào quên. Mỗi trận đấu là một thử thách, và chiến thắng cuối cùng là sự đền đáp cho tất cả những giọt mồ hôi trên sân tập.',
     imageUrl: 'https://images.unsplash.com/photo-1554068533-CF24a8A53b21?q=80&w=1600', 
     likes: 350, 
-    comments: 42,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'tennis, giải đấu, thể thao, chiến thắng',
     datePublished: '2024-09-05'
@@ -82,7 +86,7 @@ export const POSTS: Post[] = [
     content: '"Dòng Chảy" không chỉ là một khối kim loại, mà là cảm xúc, là câu chuyện về sự biến đổi không ngừng của cuộc sống. Thật vinh dự khi tác phẩm được hội đồng nghệ thuật đánh giá cao.',
     imageUrl: 'https://images.unsplash.com/photo-1611762348233-83c4d5b7a2a4?q=80&w=1600', 
     likes: 180, 
-    comments: 21,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'điêu khắc, nghệ thuật, giải thưởng, sáng tạo',
     datePublished: '2024-09-02'
@@ -95,7 +99,7 @@ export const POSTS: Post[] = [
     content: 'Công trình nghiên cứu về AI trong y học của nhóm chúng tôi cuối cùng đã được xuất bản. Hy vọng nó sẽ góp một phần nhỏ vào sự tiến bộ của khoa học.',
     imageUrl: 'https://images.unsplash.com/photo-1532187643623-dbf2f5a73b15?q=80&w=1600', 
     likes: 620, 
-    comments: 88,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'nghiên cứu khoa học, AI, y học, học thuật',
     datePublished: '2024-08-28'
@@ -108,7 +112,7 @@ export const POSTS: Post[] = [
     content: 'Một vai trò mới, một trách nhiệm mới. Rất hào hứng với chặng đường sắp tới để cùng team tạo ra những chiến dịch đột phá và ấn tượng hơn nữa.',
     imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1600', 
     likes: 390, 
-    comments: 45,
+    comments: [],
     status: 'Bản nháp',
     seoKeywords: 'sự nghiệp, thăng chức, sáng tạo, marketing',
     datePublished: '2024-08-25'
@@ -181,6 +185,7 @@ export const USERS: User[] = [
     { id: 8, name: 'Hà Mai', email: 'ha.mai@example.com', password: 'password123', avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200', role: 'User', joined: '2024-07-30', status: 'Hoạt động', points: 450, level: 'Người đóng góp', onlineStatus: 'Offline' },
     { id: 9, name: 'Minh Quân', email: 'minh.quan@example.com', password: 'password123', avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200', role: 'User', joined: '2024-09-05', status: 'Hoạt động', points: 80, level: 'Thành viên mới', onlineStatus: 'Offline' },
     { id: 10, name: 'Người Dùng Bị Cấm', email: 'suspended@example.com', password: 'password123', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200', role: 'User', joined: '2024-05-20', status: 'Bị cấm', points: 0, level: 'Thành viên mới', onlineStatus: 'Offline' },
+    { id: 11, name: 'Thành viên mới', email: 'pending@example.com', password: 'password123', avatarUrl: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=200', role: 'User', joined: new Date().toISOString().split('T')[0], status: 'Chờ duyệt', points: 0, level: 'Thành viên mới', onlineStatus: 'Offline' },
 ];
 
 export const USER_PROFILE_DATA: UserProfileData = {
@@ -208,7 +213,7 @@ export const USER_PROFILE_DATA: UserProfileData = {
 export const ADMIN_STATS: AdminStat[] = [
     { title: 'Tổng Người Dùng', value: '1,250', change: '+12%', icon: UsersIcon },
     { title: 'Doanh Thu Tháng', value: '112.500.000₫', change: '+5.5%', icon: DollarSignIcon },
-    { title: 'Tỷ Lệ Tham Gia', value: '78%', change: '+3%', icon: BarChartIcon },
+    { title: 'Người dùng chờ duyệt', value: '1', change: '', icon: UserCheckIcon },
     { title: 'Bài Viết Mới', value: '312', change: '+20%', icon: ZapIcon },
 ];
 
@@ -261,7 +266,7 @@ export const NEWS_POSTS: Post[] = [
     content: 'Mùa giải mới đã chính thức bắt đầu! Hãy cùng xem ai sẽ là người dẫn đầu trong các hạng mục năm nay.',
     imageUrl: 'https://images.unsplash.com/photo-1599334394218-c68196f1947b?q=80&w=800', 
     likes: 320, 
-    comments: 15,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'bảng xếp hạng, mùa giải, thông báo',
     datePublished: '2024-10-01'
@@ -274,7 +279,7 @@ export const NEWS_POSTS: Post[] = [
     content: 'Cổng đăng ký cho giải đấu tennis lớn nhất năm đã mở. Đừng bỏ lỡ cơ hội tranh tài và nhận những phần thưởng giá trị.',
     imageUrl: 'https://images.unsplash.com/photo-1560089023-745c1a1f50a2?q=80&w=800', 
     likes: 180, 
-    comments: 9,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'tennis, giải đấu, STB Cup, đăng ký',
     datePublished: '2024-09-30'
@@ -287,7 +292,7 @@ export const NEWS_POSTS: Post[] = [
     content: 'Chúng tôi vui mừng thông báo Sportify Gear sẽ là nhà tài trợ và cung cấp trang phục chính thức cho các sự kiện của Simply The Best!',
     imageUrl: 'https://images.unsplash.com/photo-1511285560991-702963444747?q=80&w=800', 
     likes: 250, 
-    comments: 22,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'đối tác, tài trợ, Sportify Gear',
     datePublished: '2024-09-28'
@@ -300,7 +305,7 @@ export const NEWS_POSTS: Post[] = [
     content: 'Lắng nghe chia sẻ từ Dũng Phạm, một thành viên của cộng đồng, về hành trình khởi nghiệp đầy gian nan nhưng cũng rất ngọt ngào.',
     imageUrl: 'https://images.unsplash.com/photo-1497032628192-86f991767def?q=80&w=800', 
     likes: 560, 
-    comments: 45,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'câu chuyện, truyền cảm hứng, startup',
     datePublished: '2024-09-25'
@@ -313,7 +318,7 @@ export const NEWS_POSTS: Post[] = [
     content: 'Hệ thống gamification đã được làm mới với nhiều cách kiếm điểm và bộ sưu tập huy hiệu độc đáo đang chờ bạn khám phá.',
     imageUrl: 'https://images.unsplash.com/photo-1587393438459-a583a21312b9?q=80&w=800', 
     likes: 190, 
-    comments: 18,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'cập nhật, điểm thưởng, huy hiệu',
     datePublished: '2024-09-22'
@@ -326,7 +331,7 @@ export const NEWS_POSTS: Post[] = [
     content: 'Khám phá những mẫu áo, quần và phụ kiện mới nhất được thiết kế để mang lại sự thoải mái và phong cách cho các nhà vô địch.',
     imageUrl: 'https://images.unsplash.com/photo-1562157873-818bc0726f68?q=80&w=800', 
     likes: 410, 
-    comments: 31,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'sản phẩm, bộ sưu tập, thời trang',
     datePublished: '2024-09-20'
@@ -339,7 +344,7 @@ export const NEWS_POSTS: Post[] = [
     content: 'Một buổi workshop độc quyền dành cho các thành viên yêu thích nhiếp ảnh, học hỏi kinh nghiệm bắt trọn những khoảnh khắc đỉnh cao.',
     imageUrl: 'https://images.unsplash.com/photo-1516245388339-29a341b31508?q=80&w=800', 
     likes: 280, 
-    comments: 25,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'workshop, nhiếp ảnh, nghệ thuật',
     datePublished: '2024-09-18'
@@ -352,7 +357,7 @@ export const NEWS_POSTS: Post[] = [
     content: 'Để nâng cao trải nghiệm người dùng, chúng tôi sẽ tiến hành bảo trì hệ thống vào lúc 2h sáng Chủ Nhật. Xin cảm ơn sự thông cảm của bạn.',
     imageUrl: 'https://images.unsplash.com/photo-1585776245865-b92df54d6b2b?q=80&w=800', 
     likes: 90, 
-    comments: 7,
+    comments: [],
     status: 'Xuất bản',
     seoKeywords: 'bảo trì, hệ thống, thông báo',
     datePublished: '2024-09-17'

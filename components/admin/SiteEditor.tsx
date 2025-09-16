@@ -11,23 +11,19 @@ interface SiteEditorProps {
 const SiteEditor: React.FC<SiteEditorProps> = ({ content, onContentChange, partners, onPartnersChange }) => {
     const [localContent, setLocalContent] = useState<SiteContent>(content);
     const [localPartners, setLocalPartners] = useState<Partner[]>(partners);
-    const [saved, setSaved] = useState(false);
 
     const handleContentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setLocalContent({ ...localContent, [e.target.name]: e.target.value });
-        setSaved(false);
     };
 
     const handlePartnerChange = (id: number, newUrl: string) => {
         setLocalPartners(prev => prev.map(p => p.id === id ? { ...p, logoUrl: newUrl } : p));
-        setSaved(false);
     };
 
     const handleSave = () => {
         onContentChange(localContent);
         onPartnersChange(localPartners);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000); // Hide message after 2s
+        alert('Đã lưu các thay đổi về giao diện thành công!');
     };
     
     const InputField = ({ label, name, value, onChange }: { label: string, name: keyof SiteContent, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
@@ -51,7 +47,6 @@ const SiteEditor: React.FC<SiteEditorProps> = ({ content, onContentChange, partn
                     <p className="text-gray-400 mt-1">Thay đổi nội dung và hình ảnh chính trên trang chủ của bạn.</p>
                 </div>
                  <div className="flex items-center">
-                    {saved && <span className="text-green-400 mr-4 text-sm">Đã lưu thay đổi!</span>}
                     <button 
                         onClick={handleSave}
                         className="bg-yellow-400 text-gray-900 hover:bg-yellow-300 transition-all duration-300 font-bold py-2 px-6 rounded-lg text-sm">

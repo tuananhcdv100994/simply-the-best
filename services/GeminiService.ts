@@ -1,11 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
 import type { ChatMessage } from "../types";
+import type { Content } from "@google/genai";
 
-// IMPORTANT: API key is hardcoded as per user's explicit request to bypass standard security practices.
-const apiKey = 'AIzaSyDzMOeUW-zDXSeejjr4y6NT23ZOj_BHd2Y';
+const apiKey = process.env.API_KEY;
 
 if (!apiKey) {
-    console.error("API_KEY has not been set.");
+    throw new Error("API_KEY environment variable not set.");
 }
 const ai = new GoogleGenAI({ apiKey });
 
@@ -13,6 +13,7 @@ const getSystemInstruction = (role: 'Admin' | 'User', name: string) => `Bạn l�
 Vai trò của bạn là hỗ trợ, hướng dẫn và truyền cảm hứng cho người dùng.
 Người dùng hiện tại là ${name}, có vai trò là ${role}.
 - Hãy luôn trả lời bằng tiếng Việt.
+- Sử dụng công cụ tìm kiếm của Google để trả lời các câu hỏi về thời gian thực, sự kiện gần đây hoặc thông tin cập nhật.
 - Khi người dùng hỏi về cách thực hiện một tác vụ (ví dụ: "làm sao để đăng bài?", "cách sửa sản phẩm?"), hãy trả lời ngắn gọn và thêm một lệnh đặc biệt vào cuối câu trả lời của bạn. Lệnh này sẽ kích hoạt chế độ hướng dẫn trực quan.
   - Để hướng dẫn tạo bài viết, dùng lệnh: [GUIDE:create_post]
 - Khi người dùng hỏi về cách tính điểm, hãy giải thích ngắn gọn: Đăng bài (+50), nhận like (+5), nhận bình luận (+10).
@@ -20,12 +21,30 @@ Người dùng hiện tại là ${name}, có vai trò là ${role}.
 - Nếu bạn không biết câu trả lời, hãy nói rằng bạn sẽ kết nối họ với đội ngũ hỗ trợ.`;
 
 
+/**
+ * Maps the application's ChatMessage format to the Gemini API's Content format.
+ * @param messages The history of messages in the application's format.
+ * @returns The history of messages in the format required by the Gemini API.
+ */
+const mapMessagesToGeminiHistory = (messages: ChatMessage[]): Content[] => {
+    // We don't want to include the AI's "typing..." message in the history.
+    return messages.filter(msg => !msg.isTyping && msg.text).map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }],
+    }));
+};
+
+
 export async function getChatbotResponse(history: ChatMessage[], newMessage: string, userRole: 'Admin' | 'User' = 'User', userName: string = 'Bạn'): Promise<string> {
     try {
+        const geminiHistory = mapMessagesToGeminiHistory(history);
+
         const chat = ai.chats.create({
             model: 'gemini-2.5-flash',
+            history: geminiHistory,
             config: {
                 systemInstruction: getSystemInstruction(userRole, userName),
+                tools: [{googleSearch: {}}], // Enable Google Search grounding
             },
         });
         const response = await chat.sendMessage({ message: newMessage });

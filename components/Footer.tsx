@@ -3,6 +3,9 @@ import Logo from './icons/Logo';
 import PhoneIcon from './icons/PhoneIcon';
 import MapPinIcon from './icons/MapPinIcon';
 import MailIcon from './icons/MailIcon';
+import FacebookIcon from './icons/FacebookIcon';
+import YoutubeIcon from './icons/YoutubeIcon';
+import TiktokIcon from './icons/TiktokIcon';
 
 const Footer: React.FC = () => {
   return (
@@ -17,6 +20,11 @@ const Footer: React.FC = () => {
             <p className="text-gray-500 mt-4 text-sm">
               Cùng nhau tôn vinh sự xuất sắc, khát vọng vươn tầm và lan tỏa năng lượng tích cực.
             </p>
+            <div className="flex space-x-4 mt-6">
+                <a href="#" className="text-gray-400 hover:text-yellow-400"><FacebookIcon className="w-6 h-6" /></a>
+                <a href="#" className="text-gray-400 hover:text-yellow-400"><YoutubeIcon className="w-6 h-6" /></a>
+                <a href="#" className="text-gray-400 hover:text-yellow-400"><TiktokIcon className="w-6 h-6" /></a>
+            </div>
           </div>
 
           {/* Column 2: Quick Links (Placeholder) */}

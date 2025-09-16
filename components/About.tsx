@@ -26,17 +26,38 @@ const ValueCard: React.FC<{ value: CoreValue }> = ({ value }) => (
 interface AboutProps {
     title: string;
     subtitle: string;
+    isEditing?: boolean;
 }
 
-const About: React.FC<AboutProps> = ({ title, subtitle }) => {
+const About: React.FC<AboutProps> = ({ title, subtitle, isEditing }) => {
   return (
-    <Section id="about" title={title} subtitle={subtitle}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {CORE_VALUES.map((value, index) => (
-            <ValueCard key={index} value={value} />
-        ))}
+    <section id="about" className="py-20 sm:py-24 bg-gray-900">
+        <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+                <h2 
+                    id="about-title-editable"
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning={true}
+                    className={`text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white ${isEditing ? 'ring-2 ring-yellow-400 ring-dashed p-2 rounded-md focus:outline-none focus:ring-solid' : ''}`}
+                >
+                    {title}
+                </h2>
+                <p 
+                    id="about-subtitle-editable"
+                    contentEditable={isEditing}
+                    suppressContentEditableWarning={true}
+                    className={`mt-4 text-lg text-yellow-400 ${isEditing ? 'ring-2 ring-yellow-400 ring-dashed p-2 rounded-md focus:outline-none focus:ring-solid' : ''}`}
+                >
+                    {subtitle}
+                </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {CORE_VALUES.map((value, index) => (
+                    <ValueCard key={index} value={value} />
+                ))}
+            </div>
       </div>
-    </Section>
+    </section>
   );
 };
 
