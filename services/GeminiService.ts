@@ -2,12 +2,22 @@ import { GoogleGenAI } from "@google/genai";
 import type { ChatMessage } from "../types";
 import type { Content } from "@google/genai";
 
-const apiKey = process.env.API_KEY;
+let ai: GoogleGenAI | null = null;
 
-if (!apiKey) {
-    throw new Error("API_KEY environment variable not set.");
+// Gracefully initialize the AI client
+try {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        // Log an error to the console instead of throwing, to prevent crashing the app.
+        // The app will remain functional, but AI features will be disabled.
+        console.error("API_KEY environment variable not found. AI features will be disabled. This is expected in development if not set, but is an error in production.");
+    } else {
+        ai = new GoogleGenAI({ apiKey });
+    }
+} catch (error) {
+    console.error("Failed to initialize GoogleGenAI. AI features will be disabled.", error);
 }
-const ai = new GoogleGenAI({ apiKey });
+
 
 const getSystemInstruction = (role: 'Admin' | 'User', name: string) => `Bạn là một trợ lý AI thân thiện và chuyên nghiệp cho nền tảng "Simply The Best!".
 Vai trò của bạn là hỗ trợ, hướng dẫn và truyền cảm hứng cho người dùng.
@@ -34,8 +44,14 @@ const mapMessagesToGeminiHistory = (messages: ChatMessage[]): Content[] => {
     }));
 };
 
+const AI_UNAVAILABLE_MESSAGE = "Xin lỗi, chức năng AI hiện không khả dụng do lỗi cấu hình. Vui lòng liên hệ quản trị viên.";
+const AI_ERROR_MESSAGE = "Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau.";
+const AI_ACTION_FAILED_MESSAGE = "Không thể thực hiện tác vụ AI lúc này.";
 
 export async function getChatbotResponse(history: ChatMessage[], newMessage: string, userRole: 'Admin' | 'User' = 'User', userName: string = 'Bạn'): Promise<string> {
+    if (!ai) {
+        return AI_UNAVAILABLE_MESSAGE;
+    }
     try {
         const geminiHistory = mapMessagesToGeminiHistory(history);
 
@@ -52,12 +68,13 @@ export async function getChatbotResponse(history: ChatMessage[], newMessage: str
 
     } catch (error) {
         console.error("Gemini API Error (getChatbotResponse):", error);
-        return "Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau.";
+        return AI_ERROR_MESSAGE;
     }
 }
 
 // AI Content Generation Functions for PostEditor
 export async function generatePostTitle(content: string): Promise<string> {
+    if (!ai) return Promise.resolve(AI_ACTION_FAILED_MESSAGE);
     try {
         const prompt = `Dựa vào nội dung sau, hãy đề xuất 5 tiêu đề bài viết thật hấp dẫn, phù hợp với tinh thần "Simply The Best!". Chỉ trả về tiêu đề hay nhất, không giải thích gì thêm:\n\n"${content.substring(0, 500)}..."`;
         const response = await ai.models.generateContent({
@@ -67,11 +84,12 @@ export async function generatePostTitle(content: string): Promise<string> {
         return response.text.trim().replace(/"/g, ''); // Clean up response
     } catch (error) {
         console.error("Gemini API Error (generatePostTitle):", error);
-        return "Không thể tạo tiêu đề lúc này.";
+        return AI_ACTION_FAILED_MESSAGE;
     }
 }
 
 export async function optimizePostSEO(title: string, content: string): Promise<string> {
+    if (!ai) return Promise.resolve("");
     try {
         const prompt = `Phân tích tiêu đề và nội dung bài viết sau đây để đề xuất 5-7 từ khóa SEO (keywords) phù hợp nhất. Các từ khóa nên tập trung vào chủ đề chính và có khả năng thu hút tìm kiếm. Chỉ trả về danh sách các từ khóa, cách nhau bằng dấu phẩy, không giải thích gì thêm.\n\nTiêu đề: ${title}\nNội dung: "${content.substring(0, 500)}..."`;
         const response = await ai.models.generateContent({
@@ -86,6 +104,7 @@ export async function optimizePostSEO(title: string, content: string): Promise<s
 }
 
 export async function expandPostContent(content: string): Promise<string> {
+     if (!ai) return Promise.resolve(content);
      try {
         const prompt = `Hãy đóng vai một cây viết đầy cảm hứng. Dựa vào đoạn văn sau, hãy viết tiếp khoảng 2-3 câu để làm cho nội dung trở nên sâu sắc và hấp dẫn hơn, giữ nguyên văn phong gốc. Chỉ trả về phần viết thêm, không lặp lại nội dung đã có.\n\nNội dung gốc:\n"${content}"`;
         const response = await ai.models.generateContent({
