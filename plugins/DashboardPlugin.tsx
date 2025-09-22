@@ -23,15 +23,15 @@ const StatCard: React.FC<{ stat: AdminStat }> = ({ stat }) => (
 );
 
 
-const DashboardPlugin: React.FC<{users: User[], posts: any[], products: any[]}> = ({users, posts, products}) => {
+const DashboardPlugin: React.FC<{users: User[], posts: any[], products: any[], setActiveView: (view: any) => void, onUpdateUser: (user: User) => void}> = ({users, posts, products, setActiveView, onUpdateUser}) => {
     
-    const pendingUsersCount = users.filter(u => u.status === 'Chờ duyệt').length;
+    const pendingUsers = users.filter(u => u.status === 'Chờ duyệt');
 
     const stats: AdminStat[] = [
-        { title: 'Tổng Người Dùng', value: users.length.toLocaleString(), change: '+12%', icon: UsersIcon },
-        { title: 'Chờ duyệt', value: pendingUsersCount.toLocaleString(), change: '', icon: UserCheckIcon },
-        { title: 'Tổng Sản phẩm', value: products.length.toLocaleString(), change: '+5.5%', icon: DollarSignIcon },
-        { title: 'Tổng Bài viết', value: posts.length.toLocaleString(), change: '+20%', icon: ZapIcon },
+        { title: 'Tổng Người Dùng', value: users.length.toLocaleString(), change: '', icon: UsersIcon },
+        { title: 'Chờ duyệt', value: pendingUsers.length.toLocaleString(), change: '', icon: UserCheckIcon },
+        { title: 'Tổng Sản phẩm', value: products.length.toLocaleString(), change: '', icon: DollarSignIcon },
+        { title: 'Tổng Bài viết', value: posts.length.toLocaleString(), change: '', icon: ZapIcon },
     ];
     
     return (
@@ -42,7 +42,36 @@ const DashboardPlugin: React.FC<{users: User[], posts: any[], products: any[]}> 
                     <StatCard key={index} stat={stat} />
                 ))}
             </div>
-            {/* You can add more dashboard widgets here in the future */}
+
+            {pendingUsers.length > 0 && (
+                <div className="mt-8 bg-gray-800 rounded-xl border border-gray-700">
+                    <div className="p-4 border-b border-gray-700">
+                        <h3 className="font-bold text-white">Người dùng chờ phê duyệt</h3>
+                    </div>
+                    <ul className="divide-y divide-gray-700">
+                        {pendingUsers.map(user => (
+                            <li key={user.id} className="p-4 flex justify-between items-center">
+                                <div className="flex items-center space-x-3">
+                                    <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full object-cover" />
+                                    <div>
+                                        <p className="font-semibold text-white">{user.name}</p>
+                                        <p className="text-sm text-gray-400">{user.email}</p>
+                                    </div>
+                                </div>
+                                <div className="flex space-x-2">
+                                     <button onClick={() => onUpdateUser({...user, status: 'Hoạt động'})} className="text-sm bg-green-500/20 text-green-400 hover:bg-green-500/40 font-bold py-1 px-3 rounded-md">Duyệt</button>
+                                     <button onClick={() => onUpdateUser({...user, status: 'Bị cấm'})} className="text-sm bg-red-500/20 text-red-400 hover:bg-red-500/40 font-bold py-1 px-3 rounded-md">Từ chối</button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                     <div className="p-4 bg-gray-900/50 rounded-b-xl text-center">
+                        <button onClick={() => setActiveView('users')} className="text-sm font-semibold text-yellow-400 hover:underline">
+                            Xem tất cả người dùng →
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

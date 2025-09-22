@@ -47,6 +47,9 @@ export interface Product {
   price: string;
   imageUrl: string;
   description: string;
+  seoTitle?: string;
+  seoKeywords?: string;
+  seoDescription?: string;
 }
 
 export interface Badge {
@@ -171,7 +174,7 @@ export interface MediaItem {
     size: string;
 }
 
-export type AdminView = 'dashboard' | 'posts' | 'postEditor' | 'media' | 'users' | 'products' | 'productEditor' | 'appearance' | 'plugins' | 'analytics';
+export type AdminView = 'dashboard' | 'posts' | 'postEditor' | 'media' | 'users' | 'products' | 'productEditor' | 'appearance' | 'plugins' | 'analytics' | 'seo';
 
 export interface AdminSubMenuItem {
     id: AdminView;
@@ -184,4 +187,10 @@ export interface PluginDefinition {
     component: React.FC<any>; 
     notificationCount?: number;
     subItems?: AdminSubMenuItem[];
+}
+
+export interface SEOReport {
+    score: number; // 0-100
+    good: string[];
+    improvements: string[];
 }

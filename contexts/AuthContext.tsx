@@ -4,24 +4,46 @@ import { USERS } from '../constants';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
+const USERS_STORAGE_KEY = 'stb_users';
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [users, setUsers] = useState<User[]>(USERS);
+    const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Load users from localStorage, or fall back to initial constants
+        try {
+            const storedUsersJson = localStorage.getItem(USERS_STORAGE_KEY);
+            if (storedUsersJson) {
+                setUsers(JSON.parse(storedUsersJson));
+            } else {
+                setUsers(USERS); // First time load
+            }
+        } catch (error) {
+            console.error("Failed to load users from localStorage", error);
+            setUsers(USERS);
+        }
+
         // Simulate checking for a logged-in user in session storage
         const storedUserJson = sessionStorage.getItem('currentUser');
         if (storedUserJson) {
             const storedUser = JSON.parse(storedUserJson);
             setCurrentUser(storedUser);
             // On page load, if a user was logged in, ensure their status is 'Online'
-            setUsers(prevUsers => 
+             setUsers(prevUsers => 
                 prevUsers.map(u => u.id === storedUser.id ? { ...u, onlineStatus: 'Online' } : u)
             );
         }
         setLoading(false);
     }, []);
+    
+    // Persist users to localStorage whenever the state changes
+    useEffect(() => {
+        if (users.length > 0) {
+            localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+        }
+    }, [users]);
 
     const login = async (email: string, password: string): Promise<User | null> => {
         const user = users.find(u => u.email === email && u.password === password);
@@ -71,8 +93,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUsers(prev => [...prev, newUser]);
         alert('Đăng ký thành công! Tài khoản của bạn sẽ được kích hoạt sau khi quản trị viên phê duyệt.');
         // Do not log in automatically
-        // setCurrentUser(newUser);
-        // sessionStorage.setItem('currentUser', JSON.stringify(newUser));
         return true;
     };
     

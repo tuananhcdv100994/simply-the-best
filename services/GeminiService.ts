@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import type { ChatMessage } from "../types";
+import type { ChatMessage, SEOReport } from "../types";
 import type { Content } from "@google/genai";
 
 let ai: GoogleGenAI | null = null;
@@ -115,5 +115,72 @@ export async function expandPostContent(content: string): Promise<string> {
     } catch (error) {
         console.error("Gemini API Error (expandPostContent):", error);
         return content;
+    }
+}
+
+export async function generateSEODescriptionForProduct(productName: string): Promise<string> {
+    if (!ai) return Promise.resolve("");
+    try {
+        const prompt = `Viết một mô tả sản phẩm (meta description) chuẩn SEO, hấp dẫn, trong khoảng 155-160 ký tự cho sản phẩm có tên: "${productName}". Mô tả cần nêu bật được tinh thần "Simply The Best" - chất lượng, đẳng cấp và xuất sắc. Chỉ trả về nội dung mô tả, không thêm bất kỳ lời dẫn nào.`;
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+        });
+        return response.text.trim();
+    } catch (error) {
+        console.error("Gemini API Error (generateSEODescriptionForProduct):", error);
+        return "Không thể tạo mô tả. Vui lòng thử lại.";
+    }
+}
+
+export async function analyzeContentSEO(title: string, content: string): Promise<SEOReport> {
+    if (!ai) {
+        return { score: 0, good: ["Dịch vụ AI không khả dụng"], improvements: [] };
+    }
+    try {
+        const prompt = `Phân tích bài viết sau đây dưới góc độ một chuyên gia SEO.
+        - Chấm điểm SEO tổng thể trên thang 100.
+        - Liệt kê 3 điểm TỐT nhất.
+        - Liệt kê 3 điểm cần CẢI THIỆN quan trọng nhất.
+
+        Chỉ trả về kết quả dưới dạng một đối tượng JSON có cấu trúc sau: {"score": number, "good": string[], "improvements": string[]}. Không thêm bất kỳ giải thích hay định dạng markdown nào.
+
+        Tiêu đề: "${title}"
+        Nội dung: "${content.substring(0, 1000)}..."`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                responseMimeType: 'application/json',
+            }
+        });
+        
+        // The response text is a JSON string, so we parse it
+        const jsonString = response.text.trim();
+        const report = JSON.parse(jsonString);
+        return report as SEOReport;
+
+    } catch (error) {
+        console.error("Gemini API Error (analyzeContentSEO):", error);
+        return { score: 0, good: ["Lỗi phân tích"], improvements: ["Đã có lỗi xảy ra khi giao tiếp với AI."] };
+    }
+}
+
+
+export async function getAnalyticsInsights(data: Record<string, number>): Promise<string> {
+    if (!ai) return Promise.resolve(AI_ACTION_FAILED_MESSAGE);
+    try {
+        const prompt = `Dựa trên dữ liệu thống kê số lượng bài viết theo chuyên mục sau: ${JSON.stringify(data)}.
+        Hãy đưa ra 3 nhận xét ngắn gọn và thông minh về các chủ đề nổi bật hoặc các cơ hội nội dung tiềm năng.
+        Trả lời dưới dạng gạch đầu dòng.`;
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt,
+        });
+        return response.text.trim();
+    } catch (error) {
+        console.error("Gemini API Error (getAnalyticsInsights):", error);
+        return "Không thể tạo phân tích. Vui lòng thử lại.";
     }
 }

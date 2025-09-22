@@ -9,18 +9,18 @@ import ProductIcon from '../components/icons/ProductIcon';
 import AppearanceIcon from '../components/icons/AppearanceIcon';
 import PluginIcon from '../components/icons/PluginIcon';
 import AnalyticsIcon from '../components/icons/AnalyticsIcon';
+import SearchIcon from '../components/icons/SearchIcon'; // New SEO Icon
 
 // Import Plugin Components
 import DashboardPlugin from './DashboardPlugin';
 import PostManager from '../components/admin/PostManager';
-import PostEditor from '../components/admin/PostEditor';
 import MediaManager from '../components/admin/MediaManager';
 import UserManager from '../components/admin/UserManager';
 import ProductManager from '../components/admin/ProductManager';
-import ProductEditor from '../components/admin/ProductEditor';
 import SiteEditor from '../components/admin/SiteEditor';
 import PluginManager from '../components/admin/PluginManager';
 import AnalyticsPlugin from './AnalyticsPlugin';
+import SEOPlugin from './SEOPlugin'; // New SEO Plugin Component
 
 // This registry acts as the central point for defining all admin modules.
 // To add a new feature to the admin dashboard, simply add a new entry here.
@@ -52,7 +52,7 @@ export const pluginRegistry: PluginDefinition[] = [
         label: 'Người dùng',
         icon: UsersIcon,
         component: UserManager,
-        notificationCount: 5, // Example notification
+        notificationCount: 0, // Will be dynamically updated
     },
     {
         id: 'products',
@@ -61,7 +61,7 @@ export const pluginRegistry: PluginDefinition[] = [
         component: ProductManager,
          subItems: [
             { id: 'products', label: 'Tất cả sản phẩm' },
-            { id: 'productEditor', label: 'Thêm mới' }
+            // "Add New" is handled by the modal, so no sub-item needed
         ]
     },
      {
@@ -81,5 +81,11 @@ export const pluginRegistry: PluginDefinition[] = [
         label: 'Phân tích',
         icon: AnalyticsIcon,
         component: AnalyticsPlugin,
+    },
+    {
+        id: 'seo',
+        label: 'Tối ưu SEO',
+        icon: SearchIcon,
+        component: SEOPlugin,
     },
 ];

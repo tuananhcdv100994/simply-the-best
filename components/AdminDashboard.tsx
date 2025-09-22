@@ -1,11 +1,23 @@
 'use client';
 
 import React, { useState, useContext, useMemo } from 'react';
-import type { AdminView, User } from '../types';
+import type { AdminView, User, Product } from '../types';
 import AdminSidebar from './admin/AdminSidebar';
 import AdminHeader from './admin/AdminHeader';
 import { pluginRegistry } from '../plugins/registry';
 import { AuthContext } from '../contexts/AuthContext';
+
+interface AdminDashboardProps {
+  // Add other props from App.tsx here
+  onNavigate: (view: 'postEditor', data?: any) => void;
+  onEditProduct: (product: Product | null) => void;
+  products: Product[];
+  onDeleteProduct: (id: number) => void;
+  users: User[];
+  onUpdateUser: (user: User) => void;
+  // ... and so on for all props passed from App.tsx
+}
+
 
 const AdminDashboard: React.FC<any> = (props) => {
     const [activeView, setActiveView] = useState<AdminView>('dashboard');
@@ -21,7 +33,13 @@ const AdminDashboard: React.FC<any> = (props) => {
     // Filter props to pass to the active plugin component
     const pluginProps = {
       ...props,
-      setActiveView, // Pass this so plugins can navigate
+      // Custom handlers for components inside the dashboard
+      onAddNew: () => props.onNavigate('postEditor'),
+      onEdit: (post: any) => props.onNavigate('postEditor', post),
+      onAddNewProduct: () => props.onEditProduct({ id: 0, name: '', price: '', imageUrl: '', description: '' }),
+      onEditProduct: (product: Product) => props.onEditProduct(product),
+      initialPlugins: [], // Placeholder for plugins
+      setActiveView,
     };
     
     if (!auth?.currentUser) {

@@ -14,7 +14,7 @@ import AdminDashboard from './components/AdminDashboard';
 import Login from './components/Login';
 import Register from './components/Register';
 import PostEditor from './components/admin/PostEditor';
-import ProductEditor from './components/admin/ProductEditor';
+import ProductEditorModal from './components/admin/ProductEditorModal';
 import { DEFAULT_SITE_CONTENT, POSTS, PRODUCTS, PARTNERS, MEDIA_ITEMS, NEWS_POSTS } from './constants';
 import type { SiteContent, Post, Product, Partner, GuideStep, MediaItem, User, Comment } from './types';
 import CommunityStats from './components/CommunityStats';
@@ -30,7 +30,7 @@ import NewsSection from './components/NewsSection';
 import PostDetail from './components/PostDetail';
 import EditModeBar from './components/EditModeBar';
 
-type View = 'home' | 'admin' | 'login' | 'register' | 'postEditor' | 'productEditor' | 'profile' | 'postDetail';
+type View = 'home' | 'admin' | 'login' | 'register' | 'postEditor' | 'profile' | 'postDetail';
 
 const HomePageContent: React.FC<{ siteContent: SiteContent, posts: Post[], products: Product[], partners: Partner[], users: User[], onNavigate: (view: View, data?: any) => void, isEditing: boolean }> = ({ siteContent, posts, products, partners, users, onNavigate, isEditing }) => (
     <>
@@ -149,8 +149,6 @@ const AppContent: React.FC = () => {
     const navigate = (newView: View, data?: any) => {
         if (newView === 'postEditor') {
             setEditingPost(data as Post || null);
-        } else if (newView === 'productEditor') {
-            setEditingProduct(data as Product || null);
         } else if (newView === 'postDetail') {
             setSelectedPost(data as Post);
         } else {
@@ -199,7 +197,7 @@ const AppContent: React.FC = () => {
         } else { // Existing product
             setProducts(prev => prev.map(p => p.id === productToSave.id ? productToSave : p));
         }
-        navigate('admin');
+        setEditingProduct(null); // Close the modal
     };
 
     const handleDeleteProduct = (productId: number) => {
@@ -207,6 +205,10 @@ const AppContent: React.FC = () => {
             setProducts(prev => prev.filter(p => p.id !== productId));
         }
     };
+    
+    const handleOpenProductEditor = (product: Product | null) => {
+        setEditingProduct(product);
+    }
 
     const handleAddMedia = (item: Omit<MediaItem, 'id'>) => {
         const newItem: MediaItem = { ...item, id: Date.now() };
@@ -324,6 +326,7 @@ const AppContent: React.FC = () => {
                     onDeleteUser={(userId) => { /* Add delete logic to context if needed */ }}
                     products={products}
                     onDeleteProduct={handleDeleteProduct}
+                    onEditProduct={handleOpenProductEditor}
                     mediaItems={mediaItems}
                     onAddMedia={handleAddMedia}
                     partners={partners}
@@ -333,12 +336,6 @@ const AppContent: React.FC = () => {
                  return auth.currentUser?.role === 'Admin' ? <PostEditor
                     post={editingPost}
                     onSave={handleSavePost}
-                    onCancel={() => navigate('admin')}
-                /> : null;
-            case 'productEditor':
-                 return auth.currentUser?.role === 'Admin' ? <ProductEditor
-                    product={editingProduct}
-                    onSave={handleSaveProduct}
                     onCancel={() => navigate('admin')}
                 /> : null;
             case 'postDetail':
@@ -368,6 +365,13 @@ const AppContent: React.FC = () => {
     return (
         <div className="relative">
             {isEditing && <EditModeBar onSave={handleSaveEditing} onCancel={handleCancelEditing} />}
+            {editingProduct !== null && auth.currentUser?.role === 'Admin' && (
+                <ProductEditorModal
+                    product={editingProduct}
+                    onSave={handleSaveProduct}
+                    onClose={() => setEditingProduct(null)}
+                />
+            )}
             {renderView()}
             <ActionPopup onOpenAIChat={() => setChatOpen(true)} />
             <AIAssistantChat 

@@ -13,6 +13,10 @@ const UserRow: React.FC<{ user: User, onUpdateUser: (user: User) => void, onDele
     const handleStatusChange = (newStatus: 'Hoạt động' | 'Bị cấm') => {
         onUpdateUser({ ...user, status: newStatus });
     }
+    
+    const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        onUpdateUser({ ...user, role: e.target.value as 'Admin' | 'User' });
+    }
 
     const handleApprove = () => {
         onUpdateUser({ ...user, status: 'Hoạt động' });
@@ -33,7 +37,20 @@ const UserRow: React.FC<{ user: User, onUpdateUser: (user: User) => void, onDele
                     </div>
                 </div>
             </td>
-            <td className="px-6 py-4">{user.role}</td>
+            <td className="px-6 py-4">
+                {user.email === 'tuananhtran@lavisbrothers.com' ? (
+                     <span className="font-semibold text-yellow-400">{user.role}</span>
+                ) : (
+                    <select 
+                        value={user.role} 
+                        onChange={handleRoleChange} 
+                        className="bg-gray-700 border border-gray-600 rounded-md px-2 py-1 focus:outline-none focus:border-yellow-400"
+                    >
+                        <option value="User">User</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                )}
+            </td>
              <td className="px-6 py-4">
                  {user.level} {USER_LEVELS.find(l => l.name === user.level)?.badge}
             </td>
@@ -51,7 +68,7 @@ const UserRow: React.FC<{ user: User, onUpdateUser: (user: User) => void, onDele
                             <button onClick={handleDeny} className="font-medium text-red-500 hover:underline">Từ chối</button>
                         </>
                     )}
-                    {user.status === 'Hoạt động' && user.role !== 'Admin' && (
+                    {user.status === 'Hoạt động' && user.role !== 'Admin' && user.email !== 'tuananhtran@lavisbrothers.com' && (
                         <button onClick={() => handleStatusChange('Bị cấm')} className="font-medium text-red-500 hover:underline">Cấm</button>
                     )}
                     {user.status === 'Bị cấm' && user.role !== 'Admin' && (
