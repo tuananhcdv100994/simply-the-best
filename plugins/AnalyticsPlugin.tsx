@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import BarChartIcon from '../components/icons/BarChartIcon';
-import { POSTS } from '../constants'; // Assuming posts data is available
 import { getAnalyticsInsights } from '../services/GeminiService';
 import ZapIcon from '../components/icons/ZapIcon';
+import { ContentContext } from '../contexts/ContentContext';
 
 const AnalyticsPlugin: React.FC = () => {
     const [insights, setInsights] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
+    const content = useContext(ContentContext);
 
-    // Process data for the chart
-    const postsPerCategory = POSTS.reduce((acc, post) => {
+    if (!content) return null;
+    const { posts } = content;
+
+    const postsPerCategory = posts.reduce((acc, post) => {
         acc[post.category] = (acc[post.category] || 0) + 1;
         return acc;
     }, {} as Record<string, number>);
@@ -93,7 +96,7 @@ const AnalyticsPlugin: React.FC = () => {
                         <p className="font-bold text-yellow-400">Gợi ý từ AI:</p>
                         <ul className="list-disc pl-5">
                             {insights.split('\n').map((item, index) => {
-                                const cleanItem = item.replace(/^- /, ''); // Clean up bullet points
+                                const cleanItem = item.replace(/^- /, '');
                                 return cleanItem && <li key={index}>{cleanItem}</li>;
                             })}
                         </ul>

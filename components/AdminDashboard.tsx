@@ -6,46 +6,41 @@ import AdminSidebar from './admin/AdminSidebar';
 import AdminHeader from './admin/AdminHeader';
 import { pluginRegistry } from '../plugins/registry';
 import { AuthContext } from '../contexts/AuthContext';
+import { ContentContext } from '../contexts/ContentContext';
 
 interface AdminDashboardProps {
-  // Add other props from App.tsx here
   onNavigate: (view: 'postEditor', data?: any) => void;
   onEditProduct: (product: Product | null) => void;
-  products: Product[];
-  onDeleteProduct: (id: number) => void;
-  users: User[];
-  onUpdateUser: (user: User) => void;
-  // ... and so on for all props passed from App.tsx
 }
 
 
-const AdminDashboard: React.FC<any> = (props) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = (props) => {
     const [activeView, setActiveView] = useState<AdminView>('dashboard');
     const auth = useContext(AuthContext);
+    const content = useContext(ContentContext);
 
     const ActivePluginComponent = pluginRegistry.find(p => p.id === activeView)?.component;
 
     const pendingUserCount = useMemo(() => 
-        props.users.filter((u: User) => u.status === 'Chờ duyệt').length, 
-    [props.users]);
+        auth?.users.filter((u: User) => u.status === 'Chờ duyệt').length || 0, 
+    [auth?.users]);
     
+    if (!auth?.currentUser || !content) {
+        return null;
+    }
 
-    // Filter props to pass to the active plugin component
     const pluginProps = {
       ...props,
-      // Custom handlers for components inside the dashboard
+      ...auth,
+      ...content,
       onAddNew: () => props.onNavigate('postEditor'),
       onEdit: (post: any) => props.onNavigate('postEditor', post),
       onAddNewProduct: () => props.onEditProduct({ id: 0, name: '', price: '', imageUrl: '', description: '' }),
-      onEditProduct: (product: Product) => props.onEditProduct(product),
-      initialPlugins: [], // Placeholder for plugins
+      onEditProduct: props.onEditProduct,
+      initialPlugins: [],
       setActiveView,
     };
     
-    if (!auth?.currentUser) {
-        return null; // or a redirect component
-    }
-
     return (
         <div className="flex h-screen bg-gray-800 text-gray-100 font-sans">
             <AdminSidebar 

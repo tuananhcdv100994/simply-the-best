@@ -1,12 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import type { MediaItem } from '../../types';
 import UploadCloudIcon from '../icons/UploadCloudIcon';
 import FilmIcon from '../icons/FilmIcon';
-
-interface MediaManagerProps {
-    items: MediaItem[];
-    onAddMedia: (item: Omit<MediaItem, 'id'>) => void;
-}
+import { ContentContext } from '../../contexts/ContentContext';
 
 const MediaGridItem: React.FC<{ item: MediaItem }> = ({ item }) => {
     return (
@@ -30,7 +26,11 @@ const MediaGridItem: React.FC<{ item: MediaItem }> = ({ item }) => {
 };
 
 
-const MediaManager: React.FC<MediaManagerProps> = ({ items, onAddMedia }) => {
+const MediaManager: React.FC = () => {
+    const context = useContext(ContentContext);
+
+    if (!context) return null;
+    const { mediaItems, addMedia } = context;
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -42,9 +42,9 @@ const MediaManager: React.FC<MediaManagerProps> = ({ items, onAddMedia }) => {
                         name: file.name,
                         size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
                         type: file.type.startsWith('image/') ? 'image' : 'video',
-                        url: event.target.result as string, // Base64 data URL
+                        url: event.target.result as string,
                     };
-                    onAddMedia(newItem);
+                    addMedia(newItem);
                 }
             };
             reader.readAsDataURL(file);
@@ -65,9 +65,9 @@ const MediaManager: React.FC<MediaManagerProps> = ({ items, onAddMedia }) => {
                 </label>
             </div>
             <div className="p-6">
-                {items.length > 0 ? (
+                {mediaItems.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {items.map(item => (
+                        {mediaItems.map(item => (
                             <MediaGridItem key={item.id} item={item} />
                         ))}
                     </div>

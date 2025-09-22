@@ -1,11 +1,11 @@
-import React from 'react';
-import { ADMIN_STATS } from '../constants';
+import React, { useContext } from 'react';
 import type { AdminStat, User } from '../types';
 import UsersIcon from '../components/icons/UsersIcon';
 import UserCheckIcon from '../components/icons/UserCheckIcon';
 import DollarSignIcon from '../components/icons/DollarSignIcon';
 import ZapIcon from '../components/icons/ZapIcon';
-
+import { AuthContext } from '../contexts/AuthContext';
+import { ContentContext } from '../contexts/ContentContext';
 
 const StatCard: React.FC<{ stat: AdminStat }> = ({ stat }) => (
     <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
@@ -23,7 +23,13 @@ const StatCard: React.FC<{ stat: AdminStat }> = ({ stat }) => (
 );
 
 
-const DashboardPlugin: React.FC<{users: User[], posts: any[], products: any[], setActiveView: (view: any) => void, onUpdateUser: (user: User) => void}> = ({users, posts, products, setActiveView, onUpdateUser}) => {
+const DashboardPlugin: React.FC<{ setActiveView: (view: any) => void }> = ({ setActiveView }) => {
+    const auth = useContext(AuthContext);
+    const content = useContext(ContentContext);
+
+    if (!auth || !content) return null;
+    const { users, updateUser } = auth;
+    const { posts, products } = content;
     
     const pendingUsers = users.filter(u => u.status === 'Chờ duyệt');
 
@@ -59,8 +65,8 @@ const DashboardPlugin: React.FC<{users: User[], posts: any[], products: any[], s
                                     </div>
                                 </div>
                                 <div className="flex space-x-2">
-                                     <button onClick={() => onUpdateUser({...user, status: 'Hoạt động'})} className="text-sm bg-green-500/20 text-green-400 hover:bg-green-500/40 font-bold py-1 px-3 rounded-md">Duyệt</button>
-                                     <button onClick={() => onUpdateUser({...user, status: 'Bị cấm'})} className="text-sm bg-red-500/20 text-red-400 hover:bg-red-500/40 font-bold py-1 px-3 rounded-md">Từ chối</button>
+                                     <button onClick={() => updateUser({...user, status: 'Hoạt động'})} className="text-sm bg-green-500/20 text-green-400 hover:bg-green-500/40 font-bold py-1 px-3 rounded-md">Duyệt</button>
+                                     <button onClick={() => updateUser({...user, status: 'Bị cấm'})} className="text-sm bg-red-500/20 text-red-400 hover:bg-red-500/40 font-bold py-1 px-3 rounded-md">Từ chối</button>
                                 </div>
                             </li>
                         ))}

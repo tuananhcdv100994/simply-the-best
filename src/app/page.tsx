@@ -149,8 +149,8 @@ const HomePage: React.FC = () => {
                 <Challenges />
                 {/* FIX: Pass required 'posts' and 'onNavigate' props to CommunityShowcase. */}
                 <CommunityShowcase posts={posts.filter(p => !p.author.includes('News'))} onNavigate={navigate} />
-                {/* FIX: Pass required 'onNavigate' prop to NewsSection */}
-                <NewsSection onNavigate={navigate} />
+                {/* FIX: Pass required 'posts' prop to NewsSection */}
+                <NewsSection onNavigate={navigate} posts={posts.filter(p => p.author.includes('News'))} />
                 <Events />
                 {/* FIX: Pass the required 'products' prop to the Merchandise component. */}
                 <Merchandise products={PRODUCTS} />

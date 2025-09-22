@@ -1,6 +1,6 @@
-
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
+import { ContentProvider, ContentContext } from './contexts/ContentContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -15,7 +15,6 @@ import Login from './components/Login';
 import Register from './components/Register';
 import PostEditor from './components/admin/PostEditor';
 import ProductEditorModal from './components/admin/ProductEditorModal';
-import { DEFAULT_SITE_CONTENT, POSTS, PRODUCTS, PARTNERS, MEDIA_ITEMS, NEWS_POSTS } from './constants';
 import type { SiteContent, Post, Product, Partner, GuideStep, MediaItem, User, Comment } from './types';
 import CommunityStats from './components/CommunityStats';
 import Challenges from './components/Challenges';
@@ -32,57 +31,58 @@ import EditModeBar from './components/EditModeBar';
 
 type View = 'home' | 'admin' | 'login' | 'register' | 'postEditor' | 'profile' | 'postDetail';
 
-const HomePageContent: React.FC<{ siteContent: SiteContent, posts: Post[], products: Product[], partners: Partner[], users: User[], onNavigate: (view: View, data?: any) => void, isEditing: boolean }> = ({ siteContent, posts, products, partners, users, onNavigate, isEditing }) => (
-    <>
-        <main>
-            <Hero 
-                title={siteContent.heroTitle} 
-                slogan={siteContent.heroSlogan} 
-                subtitle={siteContent.heroSubtitle}
-                imageUrl={siteContent.heroImageUrl}
-                isEditing={isEditing}
-            />
-            <CommunityStats />
-            <Leaderboard />
-            <About title={siteContent.aboutTitle} subtitle={siteContent.aboutSubtitle} isEditing={isEditing} />
-            <Challenges />
-            <OnlineUsers users={users} />
-            <CommunityShowcase posts={posts} onNavigate={onNavigate} />
-            <NewsSection onNavigate={onNavigate} />
-            <Events />
-            <Merchandise products={products} />
-            <PartnersComponent partners={partners} />
-            <CTA />
-            <UserProfile />
-        </main>
-        <Footer />
-    </>
-);
+const HomePageContent: React.FC<{ onNavigate: (view: View, data?: any) => void, isEditing: boolean }> = ({ onNavigate, isEditing }) => {
+    const contentCtx = useContext(ContentContext);
+    const authCtx = useContext(AuthContext);
+
+    if (!contentCtx || !authCtx) return null;
+    const { siteContent, posts, products, partners } = contentCtx;
+
+    return (
+        <>
+            <main>
+                <Hero 
+                    title={siteContent.heroTitle} 
+                    slogan={siteContent.heroSlogan} 
+                    subtitle={siteContent.heroSubtitle}
+                    imageUrl={siteContent.heroImageUrl}
+                    isEditing={isEditing}
+                />
+                <CommunityStats />
+                <Leaderboard />
+                <About title={siteContent.aboutTitle} subtitle={siteContent.aboutSubtitle} isEditing={isEditing} />
+                <Challenges />
+                <OnlineUsers users={authCtx.users} />
+                <CommunityShowcase posts={posts.filter(p => p.id < 100)} onNavigate={onNavigate} />
+                <NewsSection onNavigate={onNavigate} posts={posts.filter(p => p.id >= 100)} />
+                <Events />
+                <Merchandise products={products} />
+                <PartnersComponent partners={partners} />
+                <CTA />
+                <UserProfile />
+            </main>
+            <Footer />
+        </>
+    );
+}
 
 
 const AppContent: React.FC = () => {
     const [view, setView] = useState<View>('home');
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-    const [siteContent, setSiteContent] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
-    const [posts, setPosts] = useState<Post[]>([...POSTS, ...NEWS_POSTS]);
-    const [products, setProducts] = useState<Product[]>(PRODUCTS);
-    const [partners, setPartners] = useState<Partner[]>(PARTNERS);
-    const [mediaItems, setMediaItems] = useState<MediaItem[]>(MEDIA_ITEMS);
     const [editingPost, setEditingPost] = useState<Post | null>(null);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     
-    // AI Assistant State
     const [isChatOpen, setChatOpen] = useState(false);
     const [isGuiding, setIsGuiding] = useState(false);
     const [guideSteps, setGuideSteps] = useState<GuideStep[]>([]);
     const [currentGuideStep, setCurrentGuideStep] = useState(0);
 
-    // Inline Editing State
     const [isEditing, setIsEditing] = useState(false);
-    const [tempSiteContent, setTempSiteContent] = useState<SiteContent>(siteContent);
-
+    const [tempSiteContent, setTempSiteContent] = useState<SiteContent | null>(null);
 
     const auth = useContext(AuthContext);
+    const content = useContext(ContentContext);
 
     useEffect(() => {
         const hasSeenWelcome = sessionStorage.getItem('hasSeenWelcome');
@@ -104,14 +104,13 @@ const AppContent: React.FC = () => {
                     setCurrentGuideStep(0);
                     setIsGuiding(true);
                     setChatOpen(false);
-                }, 500); // Increased delay to ensure view transition
+                }, 500);
             };
 
             if (guideName.includes('post') && auth?.currentUser?.role === 'Admin') {
                 if (view !== 'admin') {
                     navigateToAdminAndGuide();
                 } else {
-                    // Already in admin, just start the guide
                     setGuideSteps(guide);
                     setCurrentGuideStep(0);
                     setIsGuiding(true);
@@ -159,76 +158,66 @@ const AppContent: React.FC = () => {
     };
     
     const handleSavePost = (postToSave: Post) => {
-        if (postToSave.id === 0) { // New post
-            const newPost = { ...postToSave, id: Date.now(), author: auth?.currentUser?.name || 'Admin', likes: 0, comments: [] };
-            setPosts(prev => [newPost, ...prev]);
-        } else { // Existing post
-            setPosts(prev => prev.map(p => p.id === postToSave.id ? postToSave : p));
-        }
+        content?.handleSavePost(postToSave, auth?.currentUser?.name || 'Admin');
         navigate('admin', {subView: 'posts'});
     };
 
     const handleLikePost = (postId: number) => {
-        setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: p.likes + 1 } : p));
-        if (selectedPost && selectedPost.id === postId) {
-            setSelectedPost(prev => prev ? { ...prev, likes: prev.likes + 1 } : null);
+        const post = content?.posts.find(p => p.id === postId);
+        if (post && content) {
+            const updatedPost = { ...post, likes: post.likes + 1 };
+            content.updatePost(updatedPost);
+            if (selectedPost && selectedPost.id === postId) {
+                setSelectedPost(updatedPost);
+            }
         }
     };
 
     const handleAddComment = (postId: number, commentText: string) => {
-        if (!auth?.currentUser) return;
-        const newComment: Comment = {
-            id: Date.now(),
-            author: auth.currentUser.name,
-            avatarUrl: auth.currentUser.avatarUrl,
-            text: commentText,
-            date: 'Vừa xong'
-        };
-        setPosts(prev => prev.map(p => p.id === postId ? { ...p, comments: [...p.comments, newComment] } : p));
-        if (selectedPost && selectedPost.id === postId) {
-            setSelectedPost(prev => prev ? { ...prev, comments: [...prev.comments, newComment] } : null);
+        if (!auth?.currentUser || !content) return;
+        const post = content.posts.find(p => p.id === postId);
+        if(post) {
+            const newComment: Comment = {
+                id: Date.now(),
+                author: auth.currentUser.name,
+                avatarUrl: auth.currentUser.avatarUrl,
+                text: commentText,
+                date: 'Vừa xong'
+            };
+            const updatedPost = { ...post, comments: [...post.comments, newComment] };
+            content.updatePost(updatedPost);
+            if (selectedPost && selectedPost.id === postId) {
+                setSelectedPost(updatedPost);
+            }
         }
     };
     
     const handleSaveProduct = (productToSave: Product) => {
-        if (productToSave.id === 0) { // New product
-            const newProduct = { ...productToSave, id: Date.now() };
-            setProducts(prev => [newProduct, ...prev]);
-        } else { // Existing product
-            setProducts(prev => prev.map(p => p.id === productToSave.id ? productToSave : p));
+        if (productToSave.id === 0) {
+            content?.addProduct(productToSave);
+        } else {
+            content?.updateProduct(productToSave);
         }
-        setEditingProduct(null); // Close the modal
+        setEditingProduct(null);
     };
 
-    const handleDeleteProduct = (productId: number) => {
-        if (window.confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
-            setProducts(prev => prev.filter(p => p.id !== productId));
-        }
-    };
-    
     const handleOpenProductEditor = (product: Product | null) => {
         setEditingProduct(product);
     }
 
-    const handleAddMedia = (item: Omit<MediaItem, 'id'>) => {
-        const newItem: MediaItem = { ...item, id: Date.now() };
-        setMediaItems(prev => [newItem, ...prev]);
-    };
-
-    // --- Inline Editing Handlers ---
     const handleToggleEditing = () => {
-        if (!isEditing) {
-            setTempSiteContent(siteContent); // Store current content in temp state
+        if (!isEditing && content) {
+            setTempSiteContent(content.siteContent);
         }
         setIsEditing(!isEditing);
     };
 
     const handleCancelEditing = () => {
         setIsEditing(false);
-        // No need to restore, siteContent was never changed
     };
 
     const handleSaveEditing = useCallback(() => {
+        if (!content || !tempSiteContent) return;
         const newHeroTitle = document.getElementById('hero-title-editable')?.innerText || tempSiteContent.heroTitle;
         const newHeroSlogan = document.getElementById('hero-slogan-editable')?.innerText || tempSiteContent.heroSlogan;
         const newHeroSubtitle = document.getElementById('hero-subtitle-editable')?.innerText || tempSiteContent.heroSubtitle;
@@ -236,7 +225,7 @@ const AppContent: React.FC = () => {
         const newAboutSubtitle = document.getElementById('about-subtitle-editable')?.innerText || tempSiteContent.aboutSubtitle;
         
         const updatedContent: SiteContent = {
-            ...siteContent, // Keep things like imageUrl
+            ...content.siteContent,
             heroTitle: newHeroTitle,
             heroSlogan: newHeroSlogan,
             heroSubtitle: newHeroSubtitle,
@@ -244,16 +233,14 @@ const AppContent: React.FC = () => {
             aboutSubtitle: newAboutSubtitle,
         };
         
-        setSiteContent(updatedContent);
-        setTempSiteContent(updatedContent);
+        content.updateSiteContent(updatedContent);
         setIsEditing(false);
         alert('Nội dung trang chủ đã được cập nhật!');
-    }, [siteContent, tempSiteContent]);
+    }, [content, tempSiteContent]);
 
 
     const renderGuideTooltip = () => {
         if (!isGuiding || guideSteps.length === 0) return null;
-
         const step = guideSteps[currentGuideStep];
         const element = document.querySelector(`[data-guide-id='${step.elementId}']`);
         if (!element) {
@@ -264,9 +251,7 @@ const AppContent: React.FC = () => {
             }
             return null;
         };
-
         const rect = element.getBoundingClientRect();
-        
         return (
             <>
                  <div className="fixed inset-0 bg-black/70 z-[9998]"></div>
@@ -304,8 +289,7 @@ const AppContent: React.FC = () => {
         )
     }
 
-
-    if (auth?.loading) {
+    if (auth?.loading || !content) {
         return <div className="flex items-center justify-center min-h-screen text-yellow-400 text-xl">Đang tải...</div>;
     }
 
@@ -317,21 +301,9 @@ const AppContent: React.FC = () => {
                 return <Register onNavigate={navigate} />;
             case 'admin':
                 return auth.currentUser?.role === 'Admin' ? <AdminDashboard
-                    siteContent={siteContent}
-                    onContentChange={setSiteContent}
-                    posts={posts}
                     onNavigate={navigate}
-                    users={auth.users}
-                    onUpdateUser={auth.updateUser}
-                    onDeleteUser={(userId) => { /* Add delete logic to context if needed */ }}
-                    products={products}
-                    onDeleteProduct={handleDeleteProduct}
                     onEditProduct={handleOpenProductEditor}
-                    mediaItems={mediaItems}
-                    onAddMedia={handleAddMedia}
-                    partners={partners}
-                    onPartnersChange={setPartners}
-                /> : <HomePageContent siteContent={siteContent} posts={POSTS} products={products} partners={partners} users={auth.users} onNavigate={navigate} isEditing={isEditing} />;
+                /> : <HomePageContent onNavigate={navigate} isEditing={isEditing} />;
             case 'postEditor':
                  return auth.currentUser?.role === 'Admin' ? <PostEditor
                     post={editingPost}
@@ -347,20 +319,19 @@ const AppContent: React.FC = () => {
                         onComment={handleAddComment}
                     />
                     <Footer />
-                </div> : <HomePageContent siteContent={siteContent} posts={POSTS} products={products} partners={partners} users={auth.users} onNavigate={navigate} isEditing={isEditing}/>;
+                </div> : <HomePageContent onNavigate={navigate} isEditing={isEditing}/>;
             case 'profile':
             case 'home':
             default:
                  return (
                     <div className="bg-gray-900 min-h-screen">
                       <Header onNavigate={navigate} onToggleEditing={handleToggleEditing} isEditing={isEditing} />
-                      <HomePageContent siteContent={siteContent} posts={POSTS} products={products} partners={partners} users={auth.users} onNavigate={navigate} isEditing={isEditing} />
+                      <HomePageContent onNavigate={navigate} isEditing={isEditing} />
                       <MobileBottomNav onNavigate={navigate} isLoggedIn={!!auth.currentUser} />
                     </div>
                   )
         }
     }
-
 
     return (
         <div className="relative">
@@ -387,7 +358,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
     return (
         <AuthProvider>
-            <AppContent />
+            <ContentProvider>
+                <AppContent />
+            </ContentProvider>
         </AuthProvider>
     );
 };

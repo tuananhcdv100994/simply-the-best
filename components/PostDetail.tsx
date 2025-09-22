@@ -3,6 +3,7 @@ import type { Post } from '../types';
 import HeartIcon from './icons/HeartIcon';
 import MessageSquareIcon from './icons/MessageSquareIcon';
 import { AuthContext } from '../contexts/AuthContext';
+import JsonLd from './JsonLd';
 
 interface PostDetailProps {
     post: Post;
@@ -22,8 +23,30 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, onLike, onComment }) => {
         }
     };
 
+    const articleSchema = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": post.title,
+        "image": post.imageUrl,
+        "author": {
+            "@type": "Person",
+            "name": post.author
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Simply The Best!",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://levispaints.com/wp-content/uploads/2025/09/z6993884557561_a7f5bc5422dd21542c97f50de2965bda-Photoroom.png"
+            }
+        },
+        "datePublished": post.datePublished,
+        "description": post.content.substring(0, 200).replace(/\n/g, ' ') + '...'
+    };
+
     return (
         <div className="bg-gray-900 pt-24 pb-16">
+            <JsonLd data={articleSchema} />
             <div className="container mx-auto px-4">
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}

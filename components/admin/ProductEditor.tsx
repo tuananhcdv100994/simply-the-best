@@ -76,15 +76,15 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onSave, onCancel
                         <div className="p-6 space-y-4">
                              <div>
                                 <label htmlFor="seoTitle" className="block text-sm font-bold mb-2 text-gray-300">Thẻ Tiêu đề (Title Tag)</label>
-                                <input type="text" id="seoTitle" name="seoTitle" value={editedProduct.seoTitle} onChange={handleChange} className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-yellow-400"/>
+                                <input type="text" id="seoTitle" name="seoTitle" value={editedProduct.seoTitle || ''} onChange={handleChange} className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-yellow-400"/>
                             </div>
                              <div>
                                 <label htmlFor="seoKeywords" className="block text-sm font-bold mb-2 text-gray-300">Từ khóa (Keywords)</label>
-                                <input type="text" id="seoKeywords" name="seoKeywords" value={editedProduct.seoKeywords} onChange={handleChange} className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-yellow-400"/>
+                                <input type="text" id="seoKeywords" name="seoKeywords" value={editedProduct.seoKeywords || ''} onChange={handleChange} className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-yellow-400"/>
                             </div>
                             <div>
                                 <label htmlFor="seoDescription" className="block text-sm font-bold mb-2 text-gray-300">Mô tả Meta (Meta Description)</label>
-                                <textarea id="seoDescription" name="seoDescription" value={editedProduct.seoDescription} onChange={handleChange} rows={3} className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-yellow-400"/>
+                                <textarea id="seoDescription" name="seoDescription" value={editedProduct.seoDescription || ''} onChange={handleChange} rows={3} className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-yellow-400"/>
                                 <button onClick={handleGenerateDesc} disabled={isAiLoading} className="mt-2 text-sm bg-gray-700 text-white hover:bg-yellow-400 hover:text-gray-900 transition-colors font-bold py-2 px-3 rounded-lg disabled:opacity-50 flex items-center space-x-2">
                                     <ZapIcon className="w-4 h-4" />
                                     <span>{isAiLoading ? 'Đang tạo...' : 'Tạo bằng AI'}</span>

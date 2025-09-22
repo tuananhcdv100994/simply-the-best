@@ -3,6 +3,8 @@
 import React, { useContext } from 'react';
 // FIX: Import AuthContext and UserBar instead of the public Header.
 import { AuthContext } from '@/contexts/AuthContext';
+// FIX: Import ContentProvider to make content state available to admin pages.
+import { ContentProvider } from '../../contexts/ContentContext';
 import UserBar from '@/components/UserBar';
 import { useRouter } from 'next/navigation';
 
@@ -46,13 +48,16 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="bg-gray-900 min-h-screen">
-      {/* FIX: Use UserBar for authenticated admin users instead of the public Header. */}
-      {/* This resolves the missing 'onNavigate' prop error by using the correct component. */}
-      <UserBar user={auth.currentUser} onLogout={handleLogout} onNavigate={handleNavigate} />
-      <main>
-        {children}
-      </main>
-    </div>
+    // FIX: Wrap the entire layout with ContentProvider so all admin children can access content context.
+    <ContentProvider>
+      <div className="bg-gray-900 min-h-screen">
+        {/* FIX: Use UserBar for authenticated admin users instead of the public Header. */}
+        {/* This resolves the missing 'onNavigate' prop error by using the correct component. */}
+        <UserBar user={auth.currentUser} onLogout={handleLogout} onNavigate={handleNavigate} />
+        <main>
+          {children}
+        </main>
+      </div>
+    </ContentProvider>
   );
 }

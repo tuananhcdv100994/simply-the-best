@@ -98,6 +98,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     const updateUser = (updatedUser: User) => {
         setUsers(prevUsers => prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u));
+        if (currentUser && currentUser.id === updatedUser.id) {
+            setCurrentUser(updatedUser);
+            sessionStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        }
     };
 
     const logout = () => {

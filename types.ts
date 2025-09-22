@@ -194,3 +194,19 @@ export interface SEOReport {
     good: string[];
     improvements: string[];
 }
+
+export interface ContentContextType {
+    posts: Post[];
+    products: Product[];
+    mediaItems: MediaItem[];
+    siteContent: SiteContent;
+    partners: Partner[];
+    updatePost: (post: Post) => void;
+    addProduct: (product: Omit<Product, 'id'>) => void;
+    updateProduct: (product: Product) => void;
+    deleteProduct: (productId: number) => void;
+    addMedia: (item: Omit<MediaItem, 'id'>) => void;
+    updateSiteContent: (content: SiteContent) => void;
+    updatePartners: (partners: Partner[]) => void;
+    handleSavePost: (post: Post) => void;
+}

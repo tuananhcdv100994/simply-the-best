@@ -1,14 +1,14 @@
 import React from 'react';
 import Section from './Section';
-import { NEWS_POSTS } from '../constants';
 import PostCard from './PostCard';
 import type { Post } from '../types';
 
 interface NewsSectionProps {
   onNavigate: (view: 'postDetail', data: Post) => void;
+  posts: Post[];
 }
 
-const NewsSection: React.FC<NewsSectionProps> = ({ onNavigate }) => {
+const NewsSection: React.FC<NewsSectionProps> = ({ onNavigate, posts }) => {
   return (
     <Section 
       id="news" 
@@ -17,7 +17,7 @@ const NewsSection: React.FC<NewsSectionProps> = ({ onNavigate }) => {
       className="bg-gray-900"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {NEWS_POSTS.map((post) => (
+        {posts.map((post) => (
             <PostCard key={post.id} post={post} onNavigate={onNavigate} />
         ))}
       </div>

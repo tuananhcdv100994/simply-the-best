@@ -9,7 +9,7 @@ interface SEOPluginProps {
     products: Product[];
 }
 
-// FIX: Define ContentItem as a discriminated union for proper type narrowing.
+// Define ContentItem as a discriminated union for proper type narrowing.
 type ContentItem = (Post & { type: 'Post' }) | (Product & { type: 'Product' });
 
 const SEOPlugin: React.FC<SEOPluginProps> = ({ posts, products }) => {
@@ -28,7 +28,7 @@ const SEOPlugin: React.FC<SEOPluginProps> = ({ posts, products }) => {
         setLoadingId(key);
         setAnalysisResult(prev => ({ ...prev, [key]: null }));
         
-        // FIX: Use type-safe property access based on the discriminated union.
+        // Use type-safe property access based on the discriminated union.
         const title = item.type === 'Post' ? item.title : item.name;
         const content = item.type === 'Post' ? item.content : item.description;
 
@@ -70,7 +70,7 @@ const SEOPlugin: React.FC<SEOPluginProps> = ({ posts, products }) => {
                     const key = `${item.type}-${item.id}`;
                     const result = analysisResult[key];
                     const isLoading = loadingId === key;
-                    // FIX: Use type-safe property access based on the discriminated union.
+                    // Use type-safe property access based on the discriminated union.
                     const title = item.type === 'Post' ? item.title : item.name;
 
                     return (

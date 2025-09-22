@@ -1,29 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import type { SiteContent, Partner } from '../../types';
+import { ContentContext } from '../../contexts/ContentContext';
 
-interface SiteEditorProps {
-    content: SiteContent;
-    onContentChange: React.Dispatch<React.SetStateAction<SiteContent>>;
-    partners: Partner[];
-    onPartnersChange: React.Dispatch<React.SetStateAction<Partner[]>>;
-}
+const SiteEditor: React.FC = () => {
+    const context = useContext(ContentContext);
 
-const SiteEditor: React.FC<SiteEditorProps> = ({ content, onContentChange, partners, onPartnersChange }) => {
-    const [localContent, setLocalContent] = useState<SiteContent>(content);
-    const [localPartners, setLocalPartners] = useState<Partner[]>(partners);
+    const [localContent, setLocalContent] = useState<SiteContent | null>(null);
+    const [localPartners, setLocalPartners] = useState<Partner[] | null>(null);
+    
+    useEffect(() => {
+        if (context) {
+            setLocalContent(context.siteContent);
+            setLocalPartners(context.partners);
+        }
+    }, [context]);
+
+    if (!context || !localContent || !localPartners) {
+        return <div>Đang tải trình chỉnh sửa...</div>;
+    }
+
+    const { updateSiteContent, updatePartners } = context;
 
     const handleContentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setLocalContent({ ...localContent, [e.target.name]: e.target.value });
+        if(localContent){
+            setLocalContent({ ...localContent, [e.target.name]: e.target.value });
+        }
     };
 
     const handlePartnerChange = (id: number, newUrl: string) => {
-        setLocalPartners(prev => prev.map(p => p.id === id ? { ...p, logoUrl: newUrl } : p));
+        setLocalPartners(prev => prev!.map(p => p.id === id ? { ...p, logoUrl: newUrl } : p));
     };
 
     const handleSave = () => {
-        onContentChange(localContent);
-        onPartnersChange(localPartners);
-        alert('Đã lưu các thay đổi về giao diện thành công!');
+        if (localContent && localPartners) {
+            updateSiteContent(localContent);
+            updatePartners(localPartners);
+            alert('Đã lưu các thay đổi về giao diện thành công!');
+        }
     };
     
     const InputField = ({ label, name, value, onChange }: { label: string, name: keyof SiteContent, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
